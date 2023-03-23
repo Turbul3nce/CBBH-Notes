@@ -157,3 +157,39 @@ Command: echo uggcf://jjj.unpxgurobk.rh/ | tr 'A-Za-z' 'N-ZA-Mn-za-m' # Decode r
 Decode Site: https://rot13.com/
 NOTE: There are hundreds of other encoding methods we can find online. Even though these are the most common, sometimes we will come across other encoding methods, which may require some experience to identify and decode.
 Identify Encoding Type Website: https://www.boxentriq.com/code-breaking/cipher-identifier
+# Cross-Site Scripting (XSS)
+Note: XSS vulnerabilities take advantage of a flaw in user input sanitization to "write" JavaScript code >
+Note: XSS vulnerabilities are solely executed on the client-side and hence do not directly affect the bac>
+Risk: Medium Risk (low impact + high probability = medium risk)
+Types of XSS:
+* Stored(Persistent) XSS - Most critical.
+* Reflected(Non-Persistent) XSS - User input displayed to the page.
+* DOM-Based XSS - Non-persistent. User input is shown in the browser, completely processed on client-side.
+## XSS Testing Payloads
+Payload: <script>alert(window.origin)</script> # Alert pop up with the URL of the current page.
+Note: You can verify by checking the page source and seeing if your payload is there.
+Pro Tip: Tip: Many modern web applications utilize cross-domain IFrames to handle user input, so that even if the web form is vulnerable to XSS, it would not be a vulnerability on the main web application. This is why we are showing the value of window.origin in the alert box, instead of a static value like 1. In this case, the alert box would reveal the URL it is being executed on, and will confirm which form is the vulnerable one, in case an IFrame was being used.
+Note: Some modern browsers may block the alert() JavaScript function in specific locations
+Note: One such XSS payload is <plaintext>, which will stop rendering the HTML code that comes after it and display it as plaintext. Another easy-to-spot payload is <script>print()</script> that will pop up the browser print dialog, which is unlikely to be blocked by any browsers. Try using these payloads to see how each works. You may use the reset button to remove any current payloads.
+Note: Once found, refresh the page to see whether the alert stays or goes. Stored or Reflected?
+Payload: <script>alert(document.cookie)</script> # Simple payload to show session cookie
+Question: But if the XSS vulnerability is Non-Persistent, how would we target victims with it?
+Answer: Figure out what type of HTTP request is being used. 
+Commands: Open Dev Tools, Netowork tab, test payload again, GET request?, Copy URL, send URL to target.
+Note: DOM XSS occurs when JavaScript is used to change the page source through the Document Object Model (DOM). No interaction with the backend.
+- Source and Sink
+Note: To better understand DOM-based XSS vulnerabilities, it is important to understand S & S.
+Note: Source = The Source is the JavaScript object that takes the user input, and it can be any input parameter like a URL parameter or an input field, as we saw above.
+Note: Sink = The Sink is the function that writes the user input to a DOM Object on the page. 
+- Common JS Functions to Write to DOM Objects:
+* document.write()
+* DOM.innerHTML
+* DOM.outerHTML
+- Common jQuery Library functions that write to DOM objects:
+* add()
+* after()
+* append()
+- DOM-Based Testing
+Note: If we try the XSS payload we have been using previously, we will see that it will not execute. This is because the innerHTML function does not allow the use of the <script> tags within it as a security feature.
+Payload: <img src="" onerror=alert(window.origin)>
+Note: To target a user with this DOM XSS vulnerability, we can once again copy the URL from the browser and share it with them, and once they visit it, the JavaScript code should execute.
