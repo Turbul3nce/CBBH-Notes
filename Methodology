@@ -137,3 +137,23 @@ Note: These methods are great, but once the code becomes even more obfuscated or
 Note: At this point, we would need to manually reverse engineer the code. 
 Great Tool: https://lelinhtinh.github.io/de4js/ # Used during skill assessments.
 ## Code Analysis
+- Code Variables - What is being stored? 
+- Code Objects - Check them out. Research them if necessary.
+- Code Functions - Check them out. What is the function performing? GET or POST request? To where?
+Command: curl -s http://SERVER_IP:PORT/ -X POST -d "param1=sample"
+Tip: We add the "-s" flag to reduce cluttering the response with unnecessary data.
+## Decoding 
+Note: Very often you will find obfuscated code containing encoded text blocks that get decoded upon execution. 
+Commonly used Text Encoding Methods:
+* base64
+Command: echo aHR0cHM6Ly93d3cuaGFja3RoZWJveC5ldS8K | base64 -d # Decoding base64
+Note: Spotting Base64 is easy. The length of base64 encoded strings has to be in a multiple of 4. If the resulting output is only 3 characters long, for example, an extra = is added as padding, and so on.
+* hex
+Note: Spotting hex is also easy. Any string encoded in hex would be comprised of hex characters only, which are 16 characters only: 0-9 and a-f.
+Command: echo 68747470733a2f2f7777772e6861636b746865626f782e65752f0a | xxd -p -r # Decoding Hex
+* rot13
+Note: Spotting rot13 can be easy as well. Even though this encoding method makes any text looks random, it is still possible to spot it because each character is mapped to a specific character. For example, in rot13, http://www becomes uggc://jjj, which still holds some resemblances and may be recognized as such.
+Command: echo uggcf://jjj.unpxgurobk.rh/ | tr 'A-Za-z' 'N-ZA-Mn-za-m' # Decode rot13
+Decode Site: https://rot13.com/
+NOTE: There are hundreds of other encoding methods we can find online. Even though these are the most common, sometimes we will come across other encoding methods, which may require some experience to identify and decode.
+Identify Encoding Type Website: https://www.boxentriq.com/code-breaking/cipher-identifier
