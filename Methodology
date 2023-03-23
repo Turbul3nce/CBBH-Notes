@@ -1,5 +1,6 @@
 # Chandler Rose 
 # Web App Pentesting
+# HTB Bug Bounty Notes
 # March 2023
 
 # Information Gathering (Passive)
@@ -75,37 +76,64 @@ Command: ffuf -w ./folders.txt:FOLDERS,./wordlist.txt:WORDLIST,./extensions.txt:
 # Attacking Web Applications with FUFF
 - Directory Fuzzing
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ # Assign alias to wordlist and use it in the url.
-- Extension Fuzzing
--- One common way to identify that is by finding the server type through the HTTP response headers and guessing the extension. For example, if the server is apache, then it may be .php, or if it was IIS, then it could be .asp or .aspx, and so one. 
+## Extension Fuzzing
+- One common way to identify that is by finding the server type through the HTTP response headers and guessing the extension. For example, if the server is apache, then it may be .php, or if it was IIS, then it could be .asp or .aspx, and so one. 
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://SERVER_IP:PORT/blog/indexFUZZ
-- Page Fuzzing
+## Page Fuzzing
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://SERVER_IP:PORT/blog/FUZZ.php
-- Recursive Fuzzing
--- This is why it is always advised to specify a depth to our recursive scan, such that it will not scan directories that are deeper than that depth. 
+## Recursive Fuzzing
+- This is why it is always advised to specify a depth to our recursive scan, such that it will not scan directories that are deeper than that depth. 
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://SERVER_IP:PORT/FUZZ -recursion -recursion-depth 1 -e .php -v 
-- Sub-domain Fuzzing 
+## Sub-domain Fuzzing 
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u https://FUZZ.hackthebox.eu/
-- VHOST Fuzzing
+## VHOST Fuzzing
 Note: The key difference between VHosts and sub-domains is that a VHost is basically a 'sub-domain' served on the same server and has the same IP, such that a single IP could be serving two or more different websites.
 Note: VHosts may or may not have public DNS records.
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb' # To scan for VHosts, without manually adding the entire wordlist to our /etc/hosts, we will be fuzzing HTTP headers, specifically the Host: header. To do that, we can use the -H flag to specify a header and will use the FUZZ keyword within it, as follows:
-- Filtering Results
+## Filtering Results
 Command: FUFF --help | grep filter 
-- Parameter Fuzzing - GET
+## Parameter Fuzzing - GET
 Note: Fuzzing parameters may expose unpublished parameters that are publicly accessible. Such parameters tend to be less tested and less secured, so it is important to test such parameters for the web vulnerabilities we discuss in other modules.
 Example: http://admin.academy.htb:PORT/admin/admin.php?param1=key. # Param = param1
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb/admin/admin.php?FUZZ=key -fs xxx
-- Parameter Fuzzing - POST
+## Parameter Fuzzing - POST
 Note: The main difference between POST requests and GET requests is that POST requests are not passed with the URL and cannot simply be appended after a ? symbol. POST requests are passed in the data field within the HTTP request.
 Tip: In PHP, "POST" data "content-type" can only accept "application/x-www-form-urlencoded". So, we can set that in "ffuf" with "-H 'Content-Type: application/x-www-form-urlencoded'".
 Command: ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx
 Note: Try sending a POST request with the id parameter. We can do that with curl.
 Command: curl http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'id=key' -H 'Content-Type: application/x-www-form-urlencoded'
 Note: We get a response that says "Invalid ID", which brings us to fuzzing for values.
-- Value Fuzzing
+## Value Fuzzing
 Note: This section will discuss fuzzing for parameter values, which should be fairly similar to fuzzing for parameters, once we develop our wordlist.
--- Custom Wordlists
+- Custom Wordlists
 Note: When it comes to fuzzing parameter values, we may not always find a pre-made wordlist that would work for us, as each parameter would expect a certain type of value. 
 Command: for i in $(seq 1 1000); do echo $i >> ids.txt; done # Bash command to create a list from 1-1000
--- Fuzzing Values
+- Fuzzing Values
 Command: ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs xxx
+# Javascript Deobfuscation
+Note: Obfuscation is a technique used to make a script more difficult to read by humans but allows it to function the same from a technical point of view, though performance may be slower. 
+Dev-Note: Doing authentication or encryption on the client-side is not recommended, as code is more prone to attacks this way.
+Pro-TIP: Many online tools for obfuscation, though many malicious actors and professional developers develop their own obfuscation tools to make it more difficult to deobfuscate.
+## Minifying JavaScript code
+Note: Code minification means having the entire code in a single (often very long) line. Code minification is more useful for longer code, as if our code only consisted of a single line, it would not look much different when minified.
+Note: Usually, minified JavaScript code is saved with the extension .min.js. Code minification is not exclusive to JavaScript, and can be applied to many other languages, as can be seen on javascript-minifier.
+## Packing Javascript Code
+Obfuscate Site: https://beautifytools.com/javascript-obfuscator.php
+Note: Usually recognizable from the six function arguments used in the initial function "function(p,a,c,k,e,d)".
+Test Site: https://jsconsole.com
+## Advanced Obfuscation
+AdvObfuscater: https://obfuscator.io
+## Deobfuscation 
+Method 1: Beautify The Code
+- open Dev Tools/Debugger, click script.js, click Pretty Print{}.
+Beautify Sites: https://prettier.io/playground/   &   https://beautifier.io/
+Method 2: Deobfuscate The Code
+Site: http://www.jsnice.org/
+Note: We should click on the options button next to the "Nicify JavaScript" button, and de-select "Infer types" to reduce cluttering the code with comments.
+Note: Ensure you do not leave any empty lines before the script, as it may affect the deobfuscation process and give inaccurate results.
+Note: Another way of unpacking such code is to find the return value at the end and use console.log to print it instead of executing it.
+## Reverse Engineering
+Note: These methods are great, but once the code becomes even more obfuscated or a custom obfuscater is used, it can become more difficult to deobfuscate the code. 
+Note: At this point, we would need to manually reverse engineer the code. 
+Great Tool: https://lelinhtinh.github.io/de4js/ # Used during skill assessments.
+## Code Analysis
