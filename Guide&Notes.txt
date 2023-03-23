@@ -193,3 +193,21 @@ Note: Sink = The Sink is the function that writes the user input to a DOM Object
 Note: If we try the XSS payload we have been using previously, we will see that it will not execute. This is because the innerHTML function does not allow the use of the <script> tags within it as a security feature.
 Payload: <img src="" onerror=alert(window.origin)>
 Note: To target a user with this DOM XSS vulnerability, we can once again copy the URL from the browser and share it with them, and once they visit it, the JavaScript code should execute.
+## Discovering XSS
+- Automated Discovery 
+Note: Paid Tools provide the most accuracy and help bypass certain security measures, but there are plenty of open source tools.
+Paid Tools: Nessus, Burp Pro, and ZAP.	
+Free Tools: XSS Strike, Brute XSS, XSSer.
+Command: git clone https://github.com/s0md3v/XSStrike.git # Download XSS Strike
+Command: cd XSStrike
+Command: pip install -r requirements.txt
+Command: python xsstrike.py
+Command: python xsstrike.py -u "http://SERVER_IP:PORT/index.php?task=test" # Running the tool against target.
+- Manual Discovery
+Payloads Link: https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md
+Payloads Link: https://github.com/payloadbox/xss-payload-list
+!Note: XSS can be injected into any input in the HTML page, which is not exclusive to HTML input fields, but may also be in HTTP headers like the Cookie or User-Agent (i.e., when their values are displayed on the page).
+Note: More efficient to write a python script that automates sending these payloads for us and checking page source.
+- Code Review
+!Note: We are unlikely to find any XSS vulnerabilities through payload lists or XSS tools for the more common web applications. This is because the developers of such web applications likely run their application through vulnerability assessment tools and then patch any identified vulnerabilities before release.
+Note: Reviewing the code from frontend to backend is the best way to detect XSS vulnerabilties.
