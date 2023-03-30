@@ -340,7 +340,7 @@ Cmd: CREATE TABLE logins (       # Putting it all together.
      date_of_joining DATETIME DEFAULT NOW(),
      PRIMARY KEY (id)
      );
--MySQL Statements
+## MySQL Statements
 * INSERT = used to add new records to a given table.
 EX: INSERT INTO logins VALUES(1, 'admin', 'p@ssw0rd', '2020-07-02');
 EX: INSERT INTO logins(username, password) VALUES ('john', 'john123!'), ('tom', 'tom123!'); # Insert multiple entries at once.
@@ -367,4 +367,29 @@ EX: SELECT * FROM logins WHERE id > 1;
 Note: String and date data types should be surrounded by single quote (') or double quotes ("), while numbers can be used directly.
 * LIKE = Enabling selecting records by matching a certain pattern. 
 EX: SELECT * FROM logins WHERE username LIKE 'admin%'; # The % symbol acts as a wildcard and matches all characters after admin. It is used to match zero or more characters. Similarly, the _ symbol is used to match exactly one character. 
-- SQL Operators
+## SQL Operators
+Note: Sometimes, expressions with a single condition are not enough to satisfy the user's requirement. For that, SQL supports Logical Operators to use multiple conditions at once. The most common logical operators are AND, OR, and NOT.
+- AND = The AND operator takes in two conditions and returns true or false based on their evaluation:
+- OR = The OR operator takes in two expressions as well, and returns true when at least one of them evaluates to true:
+- NOT = The NOT operator simply toggles a boolean value 'i.e. true is converted to false and vice versa':
+## Intro to SQL Injection
+- Types of SQL Injection
+-- In-band - In simple cases, the output of both the intended and the new query may be printed directly on the front end, and we can directly read it.
+	*Union based - We may have to specify the exact location, 'i.e., column', which we can read, so the query will direct the output to be printed there.
+	*Eroor based - It is used when we can get the PHP or SQL errors in the front-end, and so we may intentionally cause an SQL error that returns the output of our query.
+-- Blind - In more complicated cases, we may not get the output printed, so we may utilize SQL logic to retrieve the output character by character. 
+	*Boolean based - We can use SQL conditional statements to control whether the page returns any output at all, 'i.e., original query response,' if our conditional statement returns true. 
+	*Time based - We use SQL conditional statements that delay the page response if the conditional statement returns true using the Sleep() function.
+-- Out of band - Finally, in some cases, we may not have direct access to the output whatsoever, so we may have to direct the output to a remote location, 'i.e., DNS record,' and then attempt to retrieve it from there. 
+## SQLi Discovery
+- Testing for SQL injection
+Payload URL Encoded
+'	%27
+"	%22
+# 	%23
+;	%3B
+)	%29
+- OR Injection
+-- We would need the query to always return true.
+EX: admin' or '1'='1
+EX: SELECT * FROM logins WHERE username='admin' or '1'='1' AND password = 'something';
