@@ -394,3 +394,4 @@ Payload URL Encoded
 EX: admin' or '1'='1
 EX: SELECT * FROM logins WHERE username='admin' or '1'='1' AND password = 'something';
 NOTE: Using a prefix with sqlmap to inject 
+# Using SQLMAP and Bypassing protections
