@@ -417,4 +417,45 @@ NOTE: amper scripts can be chained, one after another, within the --tamper optio
 - Miscellaneous Bypasses
 NOTE & CMD: The first one is the Chunked transfer encoding, turned on using the switch --chunked, which splits the POST request's body into so-called "chunks." Blacklisted SQL keywords are split between chunks in a way that the request containing them can pass unnoticed.
 NOTE & CMD: The other bypass mechanisms is the HTTP parameter pollution (HPP), where payloads are split in a similar way as in case of --chunked between different same parameter named values (e.g. ?id=1&id=UNION&id=SELECT&id=username,password&id=FROM&id=users...), which are concatenated by the target platform if supporting it (e.g. ASP).
+# Command Injection 
+- Types of Injections
+* OS Command Injection
+* Code Injection 
+* SQL Injection 
+* XXS HTML Injection 
+* LDAP Injection 
+* NoSQL Injection 
+* HTTP Header Injection 
+* Xpath Injection 
+* IMAP Injection 
+* ORM Injection 
+NOTE:  Whenever user input is used within a query without being properly sanitized, it may be possible to escape the boundaries of the user input string to the parent query and manipulate it to change its intended purpose. This is why as more web technologies are introduced to web applications, we will see new types of injections introduced to web applications.
+# Injection Methods 
+Injection Operator 	Injection Character 	URL-Encoded Character 	Executed Command
+Semicolon 	; 	%3b 	Both
+New Line 	\n 	%0a 	Both
+Background 	& 	%26 	Both (second output generally shown first)
+Pipe 	| 	%7c 	Both (only second output is shown)
+AND 	&& 	%26%26 	Both (only if first succeeds)
+OR 	|| 	%7c%7c 	Second (only if first fails)
+Sub-Shell 	`` 	%60%60 	Both (Linux-only)
+Sub-Shell 	$() 	%24%28%29 	Both (Linux-only)
+
+Injection Type 	Operators
+SQL Injection 	' , ; -- /* */
+Command Injection 	; &&
+LDAP Injection 	* ( ) & |
+XPath Injection 	' or and not substring concat count
+OS Command Injection 	; & |
+Code Injection 	' ; -- /* */ $() ${} #{} %{} ^
+Directory Traversal/File Path Traversal 	../ ..\\ %00
+Object Injection 	; & |
+XQuery Injection 	' ; -- /* */
+Shellcode Injection 	\x \u %u %n
+Header Injection 	\n \r\n \t %0d %0a %09
+## Bypassing Filters and WAFs 
+* Blacklisted Characters 
+- Identifying blacklisted characters
+## Bypassing Space Filters
+ip=127.0.0.1%0a{ls,-lah,${PATH:0:1}home} # using envioment variables as / for home directory
 
