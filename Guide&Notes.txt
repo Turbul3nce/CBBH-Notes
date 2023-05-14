@@ -478,3 +478,4 @@ Windows (DOSfuscation)
 * Input Validation 
 * Input Sanitization
 * Server Configuration
+# File Upload Attacks
