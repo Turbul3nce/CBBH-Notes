@@ -492,3 +492,15 @@ There are generally two common forms of validating a file extension on the back-
  -Testing against a blacklist of types
  -Testing against a whitelist of types
 NOTE: the validation may also check the file type or the file content for type matching. 
+## Whitelist Extensions
+The following is an example of a file extension whitelist test:
+Code: php
+$fileName = basename($_FILES["uploadFile"]["name"]);
+if (!preg_match('^.*\.(jpg|jpeg|png|gif)', $fileName)) {
+    echo "Only images are allowed";
+    die();
+}
+We see that the script uses a Regular Expression (regex) to test whether the filename contains any whitelisted image extensions. The issue here lies within the regex, as it only checks whether the file name 
+* Double Extensions 
+* Reverse Double Extension - In some cases, the file upload functionality itself may not be vulnerable, but the web server configuration may lead to a vulnerability.
+
