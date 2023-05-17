@@ -479,3 +479,16 @@ Windows (DOSfuscation)
 * Input Sanitization
 * Server Configuration
 # File Upload Attacks
+## Client Side Validation 
+* Back-end Request Modification 
+Capture upload request with Burp
+Keep and eye on "filename= and content itself" 
+We may be able to modify these and upload ashell this way if there is no validation on the server side. 
+NOTE: Content-Type may also be modifed.
+* Disabling front-end validation 
+<input type="file" name="uploadFile" id="uploadFile" onchange="checkFile(this)" accept=".jpg,.jpeg,.png">
+* Blacklisting Extensions
+There are generally two common forms of validating a file extension on the back-end:
+ -Testing against a blacklist of types
+ -Testing against a whitelist of types
+NOTE: the validation may also check the file type or the file content for type matching. 
