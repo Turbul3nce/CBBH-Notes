@@ -503,4 +503,5 @@ if (!preg_match('^.*\.(jpg|jpeg|png|gif)', $fileName)) {
 We see that the script uses a Regular Expression (regex) to test whether the filename contains any whitelisted image extensions. The issue here lies within the regex, as it only checks whether the file name 
 * Double Extensions 
 * Reverse Double Extension - In some cases, the file upload functionality itself may not be vulnerable, but the web server configuration may lead to a vulnerability.
-
+# Server-Side Attacks 
+## Replicate 
